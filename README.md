@@ -1,11 +1,19 @@
 # 大符长条灯板
 
-本项目复用上上赛季留下的大符长条灯板，使用 nRF52840 进行低亮度点灯测试。当前固件按 231 颗灯珠发送数据，上电先清灯，再点亮蓝色。
+本项目复用上上赛季留下的大符长条灯板，使用 nRF52840 进行低亮度点灯测试。当前固件按 231 颗灯珠发送数据，上电先熄灯，支持通过 USB 串口调节蓝光亮度。
+
+## 网页调光
+
+1. 下载并刷入 [led231_control.uf2](led231_control.uf2)。
+2. 在仓库目录运行 `python -m http.server 8770 --bind 127.0.0.1 --directory frontend`。
+3. 用桌面版 Chrome 或 Edge 打开 `http://127.0.0.1:8770`，点击「连接串口」。没有控制板时可点「离线演示」。
+
+蓝通道可调范围为 `0–8/255`，对应约 `0–3.14%` 等效占空比。页面显示固件回报与 30 秒趋势。控制板保持供电时，心跳中断 2 秒会发送熄灯帧。灯板电压、电流和温度尚未接入传感器。更多细节见 [调光台使用说明](frontend/README.md)。
 
 ## 测试主控与固件
 
 - **主控**为 Nordic nRF52840（Arm Cortex-M4F，64 MHz）。测试工程使用 Arduino nRF52 的 `PCA10056` 板级配置，数据从 `P0.09` 输出，由 `PWM0 + EasyDMA` 发送 24 位 GRB 单线数据，位周期为 1.25 µs。[Nordic nRF52840 规格](https://www.nordicsemi.com/products/nrf52840)
-- [led231_blue.cpp](led231_blue.cpp) 是 C++ 点灯测试源码。[build.py](build.py) 使用 Arm GNU 工具链、CMSIS 和 Arduino nRF52 core 构建 `led231_blue.uf2`。该 UF2 针对使用 S140 6.1.1 的 nRF52840 UF2 引导程序。
+- [led231_blue.cpp](led231_blue.cpp) 是调光固件源码。[build.py](build.py) 使用 Arm GNU 工具链、CMSIS 和 Arduino nRF52 core 构建 `led231_control.uf2`，目标为使用 S140 6.1.1 的 nRF52840 UF2 引导程序。
 - `P0.09` 与 NFC 复用，沿用测试接法时需要将其配置为 GPIO。Nordic 将该脚标为低频 I/O，正式版本可选用支持高速输出的普通 GPIO，并在首颗灯珠的 `DIN` 处复测波形。[Nordic 引脚规格](https://docs.nordicsemi.com/r/bundle/ps_nrf52840/page/pin.html?contentId=hMpuE~dcsjrrIlIt8ErcrQ)
 
 ## 移植到其他 Arm 主控

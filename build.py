@@ -15,9 +15,9 @@ tinyusb = core / "libraries/Adafruit_TinyUSB_Arduino/src"
 spi = core / "libraries/SPI"
 sdk = base / "nordic"
 rtos = base / "freertos"
-out = root / "build"
-out.mkdir(exist_ok=True)
-firmware = "led231_blue"
+out = root / "build" / "control"
+out.mkdir(parents=True, exist_ok=True)
+firmware = "led231_control"
 
 gcc = next((tools / "arm-gcc").rglob("arm-none-eabi-gcc.exe"))
 cmsis = next((tools / "cmsis").rglob("core_cm4.h")).parent
@@ -36,13 +36,13 @@ definitions = [
     'ARDUINO_BSP_VERSION="1.7.0"', "SOFTDEVICE_PRESENT", "ARDUINO_NRF52_ADAFRUIT",
     "NRF52_SERIES", "NRF52840_XXAA", "DX_CC_TEE", "CFG_DEBUG=0", "CFG_LOGGER=0",
     "CFG_SYSVIEW=0", "USBCON", "USE_TINYUSB", "USB_VID=0x239A", "USB_PID=0x80DA",
-    'USB_MANUFACTURER="nRF52840"', 'USB_PRODUCT="LED231 Blue"',
+    'USB_MANUFACTURER="nRF52840"', 'USB_PRODUCT="LED231 Control"',
     "CONFIG_NFCT_PINS_AS_GPIOS",
 ]
 arch = ["-mcpu=cortex-m4", "-mthumb", "-mfloat-abi=hard", "-mfpu=fpv4-sp-d16"]
 common = arch + ["-Os", "-ffunction-sections", "-fdata-sections"]
 common += [f"-D{item}" for item in definitions] + [f"-I{path}" for path in includes]
-sources = [root / f"{firmware}.cpp"]
+sources = [root / "led231_blue.cpp"]
 for directory in (base, variant, tinyusb, spi):
     sources.extend(path for path in sorted(directory.rglob("*")) if path.suffix in (".c", ".cpp", ".S"))
 
